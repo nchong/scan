@@ -25,13 +25,15 @@ void run(int *data, int n, int num_iter, struct options &opt) {
   int k = (int) ceil((float)n/(float)m);
   // global workitem size
   size_t gx = k * wx;
-  LOG(LOG_INFO, "PARAMETERS");
-  LOG(LOG_INFO, "\tLength of array (n)             = %d", n);
-  LOG(LOG_INFO, "\tWorkgroup size (wx)             = %u", (int)wx);
-  LOG(LOG_INFO, "CALCULATED PARAMETERS");
-  LOG(LOG_INFO, "\tLength of local subarrays (m)   = %d", m);
-  LOG(LOG_INFO, "\tNumber of workgroups (k)        = %d", k);
-  LOG(LOG_INFO, "\tGlobal number of workitems (gx) = %d", (int)gx);
+  if (opt.verbose) {
+    printf("# PARAMETERS\n");
+    printf("# \tLength of array (n)             = %d\n", n);
+    printf("# \tWorkgroup size (wx)             = %u\n", (int)wx);
+    printf("# CALCULATED PARAMETERS\n");
+    printf("# \tLength of local subarrays (m)   = %d\n", m);
+    printf("# \tNumber of workgroups (k)        = %d\n", k);
+    printf("# \tGlobal number of workitems (gx) = %d\n", (int)gx);
+  }
   if (k > (int)wx) {
     LOG(LOG_FATAL, "Number of partials (k) > Size of local subarray (m)");
   }

@@ -65,12 +65,19 @@ __kernel void scan_pow2(__global int *gdata, __local int *ldata, int m) {
 }
 
 /*
- * Perform the first phase of an inplace exclusive scan on a global array [gdata] of length [n].
+ * Perform the first phase of an inplace exclusive scan on a global array [gdata] of arbitrary length [n].
+ *
+ * We assume that we have k workgroups each of size m/2 workitems.
+ * Each workgroup handles a subarray of length [m] (where m is a power of two).
+ * The last subarray will be padded with 0 if necessary (n < k*m).
+ * We use the primitives above to perform a scan operation within each subarray.
+ * We store the intermediate reduction of each subarray (following reduce_pow2) in [gpartial].
+ * These partial values can themselves be scanned and fed into [scan_inc_subarrays].
  */
 __kernel void scan_subarrays(
   __global int *gdata,    //length [n]
   __local  int *ldata,    //length [m]
-  __global int *gpartial, //length [k]
+  __global int *gpartial, //length [m]
            int n
 #if DEBUG
   , __global int *debug   //length [k*m]
@@ -98,9 +105,7 @@ __kernel void scan_subarrays(
   // ON EACH SUBARRAY
   // a reduce on each subarray
   reduce_pow2(ldata, m);
-  // last workitem per workgroup
-  //   saves last element of each subarray in [gpartial] before zeroing
-  // TODO: pdata padding
+  // last workitem per workgroup saves last element of each subarray in [gpartial] before zeroing
   if (lid == (wx-1)) {
     gpartial[grpid] = ldata[local_lane1];
                       ldata[local_lane1] = 0;
@@ -122,10 +127,17 @@ __kernel void scan_subarrays(
 #endif
 }
 
+/*
+ * Perform the second phase of an inplace exclusive scan on a global array [gdata] of arbitrary length [n].
+ *
+ * We assume that we have k workgroups each of size m/2 workitems.
+ * Each workgroup handles a subarray of length [m] (where m is a power of two).
+ * We sum each element by the sum of the preceding subarrays taken from [gpartial].
+ */
 __kernel void scan_inc_subarrays(
   __global int *gdata,    //length [n]
   __local  int *ldata,    //length [m]
-  __global int *gpartial, //length [k]
+  __global int *gpartial, //length [m]
            int n
 #if DEBUG
   , __global int *debug   //length [k*m]
@@ -155,4 +167,9 @@ __kernel void scan_inc_subarrays(
   if (lane1 < n) {
     gdata[lane1] = ldata[local_lane1];
   }
+
+#if DEBUG
+  debug[lane0] = ldata[local_lane0];
+  debug[lane1] = ldata[local_lane1];
+#endif
 }

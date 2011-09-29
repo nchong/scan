@@ -1,3 +1,7 @@
+/*
+ * Sequential versions of the upsweep/downsweep phases of a scan.
+ */
+
 #ifndef SEQ_SCAN_H
 #define SEQ_SCAN_H
 

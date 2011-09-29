@@ -6,6 +6,10 @@
 using namespace std;
 
 void run(int *data, int n, int num_iter, struct options &opt) {
+  if (opt.verbose) {
+    cout << clinfo();
+  }
+
   // BUILD PROGRAM AND KERNEL
   CLWrapper clw(/*platform=*/0,/*device=*/0);
   cl_program program = clw.compile("scan.cl", (DEBUG ? " -D DEBUG=true" : ""));

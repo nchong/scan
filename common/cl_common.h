@@ -1,16 +1,24 @@
 #ifndef CL_COMMON_H
 #define CL_COMMON_H
 
+#ifdef __APPLE__
+  #include <OpenCL/opencl.h>
+#elif __linux__
+  #include <CL/cl.h>
+#else
+  #error Not sure where to find OpenCL header
+#endif
+
+#include "cl_error_handling.h"
 #include "log.h"
-#include <OpenCL/opencl.h>
+
 #include <cassert>
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <map>
-#include "cl_error_handling.h"
 
 using namespace std;
 

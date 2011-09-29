@@ -1,8 +1,15 @@
 #ifndef CL_ERROR_HANDLING_H
 #define CL_ERROR_HANDLING_H
 
+#ifdef __APPLE__
+  #include <OpenCL/opencl.h>
+#elif __linux__
+  #include <CL/cl.h>
+#else
+  #error Not sure where to find OpenCL header
+#endif
+
 #include "log.h"
-#include <OpenCL/opencl.h>
 #include <cassert>
 
 // copy+paste Error Codes from cl.h

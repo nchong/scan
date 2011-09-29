@@ -7,7 +7,9 @@
 
 #include "log.h"
 #include "utils.h"
+
 #include <cmath>
+#include <cstring>
 
 #define PARANOID             false
 #define UPSWEEP_POW2_PRINT   false

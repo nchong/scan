@@ -5,13 +5,13 @@
 
 using namespace std;
 
-void run(int *data, int n, int num_iter, struct options &opt) {
+void run(int *data, int n, int num_iter, struct options &opt, map<string,float> &timings) {
   if (opt.verbose) {
     cout << clinfo();
   }
 
   // BUILD PROGRAM AND KERNEL
-  CLWrapper clw(/*platform=*/0,/*device=*/0);
+  CLWrapper clw(/*platform=*/0,/*device=*/0,/*profiling=*/true);
   cl_program program = clw.compile("scan.cl", (DEBUG ? " -D DEBUG=true" : ""));
   clw.create_all_kernels(program);
   cl_kernel scan_subarrays = clw.kernel_of_name("scan_subarrays");
@@ -88,13 +88,15 @@ void run(int *data, int n, int num_iter, struct options &opt) {
     clSetKernelArg(scan_inc_subarrays, 4, sizeof(cl_mem), (void *)&d_dbg));
 #endif
 
+  float m0 = 0; float m1 = 0;
+  float k0 = 0; float k1 = 0; float k2 = 0;
   int *result = new int[n];
   for (int run=0; run<num_iter; run++) {
-    clw.memcpy_to_dev(d_data, sizeof(int)*n, data);
-    clw.run_kernel("scan_subarrays", /*dim=*/1, &gx, &wx);
-    clw.run_kernel("scan_pow2", /*dim=*/1, &wx, &wx);
-    clw.run_kernel("scan_inc_subarrays", /*dim=*/1, &gx, &wx);
-    clw.memcpy_from_dev(d_data, sizeof(int)*n, result);
+    m0 += clw.memcpy_to_dev(d_data, sizeof(int)*n, data);
+    k0 += clw.run_kernel_with_timing("scan_subarrays", /*dim=*/1, &gx, &wx);
+    k1 += clw.run_kernel_with_timing("scan_pow2", /*dim=*/1, &wx, &wx);
+    k2 += clw.run_kernel_with_timing("scan_inc_subarrays", /*dim=*/1, &gx, &wx);
+    m1 += clw.memcpy_from_dev(d_data, sizeof(int)*n, result);
 #if DEBUG
     if (run == 0) {
       clw.memcpy_from_dev(d_dbg, sizeof(int)*dbg_len, dbg);
@@ -102,6 +104,11 @@ void run(int *data, int n, int num_iter, struct options &opt) {
     }
 #endif
   }
+  timings.insert(make_pair("1. memcpy to dev     ", m0));
+  timings.insert(make_pair("2. scan_subarrays    ", k0));
+  timings.insert(make_pair("3. scan_pow2         ", k1));
+  timings.insert(make_pair("4. scan_inc_subarrays", k2));
+  timings.insert(make_pair("5. memcpy from dev   ", m1));
 
   clw.memcpy_from_dev(d_data, sizeof(int)*n, data);
   delete[] result;

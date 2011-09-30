@@ -21,7 +21,7 @@ const char *getLogString(int level) {
   }
 }
 
-#define DEBUG_LEVEL LOG_INFO
+#define DEBUG_LEVEL LOG_WARN
 
 #ifdef DEBUG_LEVEL
 #define LOG(level, ...) do {                                                   \

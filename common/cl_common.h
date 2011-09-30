@@ -125,11 +125,29 @@ class CLWrapper {
     cl_device_id *devices;
     int d;
 
+    bool profiling;
     cl_context context;
     cl_command_queue command_queue;
     vector<cl_program> programs;
     map<string,cl_kernel> kernelmap;
     vector<cl_mem> memobjs;
+
+    float timestamp_diff_in_ms(cl_ulong start, cl_ulong end) {
+      return (end-start) * 1.0e-6f;
+    }
+
+    float time_and_release_event(cl_event e) {
+      cl_ulong start;
+      cl_ulong end;
+      ASSERT_NO_CL_ERROR(
+        clWaitForEvents(/*num_events=*/1, &e));
+      ASSERT_NO_CL_ERROR(
+        clGetEventProfilingInfo(e, CL_PROFILING_COMMAND_START, sizeof(cl_ulong), &start, /*param_value_size_ret=*/NULL));
+      ASSERT_NO_CL_ERROR(
+        clGetEventProfilingInfo(e, CL_PROFILING_COMMAND_END, sizeof(cl_ulong), &end, /*param_value_size_ret=*/NULL));
+      ASSERT_NO_CL_ERROR(clReleaseEvent(e));
+      return timestamp_diff_in_ms(start, end);
+    }
     
     void attach_context(bool all_devices=false) {
       if (all_devices) {
@@ -147,7 +165,7 @@ class CLWrapper {
     }
 
     void attach_command_queue(cl_command_queue_properties properties=0) {
-      LOG(LOG_INFO, "Attaching command queue for device %d", d);
+      LOG(LOG_INFO, "Attaching command queue%sfor device %d", profiling ? " with profiling " : " ", d);
       cl_int ret;
       command_queue = clCreateCommandQueue(context, devices[d], properties, &ret);
       assert(command_queue);
@@ -156,7 +174,7 @@ class CLWrapper {
 
   public:
     // Constructor
-    CLWrapper(int _p=0, int _d=0) : num_platforms(0), platforms(NULL), p(_p), num_devices(0), devices(NULL), d(_d) {
+    CLWrapper(int _p=0, int _d=0, bool _profiling=false) : num_platforms(0), platforms(NULL), p(_p), num_devices(0), devices(NULL), d(_d), profiling(_profiling) {
       LOG(LOG_INFO, "Initializing context and command queue for device %d on platform %d", d, p);
 
       num_platforms = query_num_platforms();
@@ -168,7 +186,7 @@ class CLWrapper {
       assert(d < (int)num_devices);
 
       attach_context();
-      attach_command_queue();
+      attach_command_queue(profiling ? CL_QUEUE_PROFILING_ENABLE : 0);
     }
 
     cl_program &compile(const char *fname,
@@ -284,24 +302,26 @@ class CLWrapper {
       delete[] devices;
     }
 
-    void memcpy_to_dev(cl_mem buffer, size_t size, const void *ptr) {
+    float memcpy_to_dev(cl_mem buffer, size_t size, const void *ptr) {
       cl_bool blocking_write = CL_TRUE;
       size_t offset = 0;
       cl_uint num_events_in_wait_list = 0;
       cl_event *event_wait_list = NULL;
-      cl_event *event = NULL;
+      cl_event e;
       ASSERT_NO_CL_ERROR(
-          clEnqueueWriteBuffer(command_queue, buffer, blocking_write, offset, size, ptr, num_events_in_wait_list, event_wait_list, event));
+        clEnqueueWriteBuffer(command_queue, buffer, blocking_write, offset, size, ptr, num_events_in_wait_list, event_wait_list, &e));
+      return time_and_release_event(e);
     }
 
-    void memcpy_from_dev(cl_mem buffer, size_t size, void *ptr) {
+    float memcpy_from_dev(cl_mem buffer, size_t size, void *ptr) {
       cl_bool blocking_read = CL_TRUE;
       size_t offset = 0;
       cl_uint num_events_in_wait_list = 0;
       cl_event *event_wait_list = NULL;
-      cl_event *event = NULL;
+      cl_event e;
       ASSERT_NO_CL_ERROR(
-          clEnqueueReadBuffer(command_queue, buffer, blocking_read, offset, size, ptr, num_events_in_wait_list, event_wait_list, event));
+        clEnqueueReadBuffer(command_queue, buffer, blocking_read, offset, size, ptr, num_events_in_wait_list, event_wait_list, &e));
+      return time_and_release_event(e);
     }
 
     void run_kernel(cl_kernel kernel, 
@@ -340,6 +360,41 @@ class CLWrapper {
         num_events_in_wait_list,
         event_wait_list,
         event);
+    }
+
+    float run_kernel_with_timing(cl_kernel kernel,
+      cl_uint work_dim,
+      const size_t *global_work_size,
+      const size_t *local_work_size,
+      const size_t *global_work_offset=NULL,
+      cl_uint num_events_in_wait_list=0,
+      const cl_event *event_wait_list=NULL) {
+      cl_event e;
+      run_kernel(kernel,
+        work_dim,
+        global_work_size,
+        local_work_size,
+        global_work_offset,
+        num_events_in_wait_list,
+        event_wait_list,
+        &e);
+      return time_and_release_event(e);
+    }
+
+    float run_kernel_with_timing(const string kernel_name,
+      cl_uint work_dim,
+      const size_t *global_work_size,
+      const size_t *local_work_size,
+      const size_t *global_work_offset=NULL,
+      cl_uint num_events_in_wait_list=0,
+      const cl_event *event_wait_list=NULL) {
+      return run_kernel_with_timing(kernel_of_name(kernel_name),
+        work_dim,
+        global_work_size,
+        local_work_size,
+        global_work_offset,
+        num_events_in_wait_list,
+        event_wait_list);
     }
 
     cl_kernel &create_kernel(cl_program program, const char*kernel_name) {

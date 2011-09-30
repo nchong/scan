@@ -1,17 +1,25 @@
 #ifndef FRAMEWORK_H
 #define FRAMEWORK_H
 
+#include "utils.h"
+
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstdio>
-#include <iostream>
 #include <fstream>
+#include <functional>
+#include <iomanip>
+#include <iostream>
+#include <map>
+#include <numeric>
 #include <sstream>
 #include <string>
 #include <vector>
-#include "utils.h"
 
-std::ofstream file;
+using namespace std;
+
+ofstream file;
 
 /* 
  * Exclusive scan on array [input] of length [n]
@@ -45,9 +53,9 @@ struct options {
 /*
  * Run [num_iter] iterations of the scan operation.
  */
-extern void run(int *data, int n, int num_iter, struct options &opt);
+extern void run(int *data, int n, int num_iter, struct options &opt, map<string,float> &timings);
 
-void print_usage(std::string progname) {
+void print_usage(string progname) {
   printf("Usage: %s [options]\n", progname.c_str());
   printf("Options:\n");
   printf("   -v         be verbose\n");
@@ -58,14 +66,50 @@ void print_usage(std::string progname) {
   printf("   -s seed    set seed for generating input data\n");
 }
 
+struct _max_str {
+  int operator()(int max, map<string,float>::value_type &item) {
+    int len = item.first.length();
+    return (len > max ? len : max);
+  }
+} max_str_in_key;
+string print_timings(map<string,float> timings, int num_iter) {
+  // table widths
+  int w0 = 1 + accumulate(timings.begin(), timings.end(), 7, max_str_in_key);
+  int w1 = 11;
+  int w2 = 15;
+
+  stringstream ss;
+  ss << left;
+  ss << fixed;
+  ss << setprecision(3);
+  float total_in_ms = 0;
+  map<string,float>::iterator i;
+  ss << setw(w0) << "# TASK";
+  ss << setw(w1) << "TIME (ms)";
+  ss << setw(w2) << "PER-ITER (ms)";
+  ss << endl;
+  for (i = timings.begin(); i != timings.end(); i++) {
+    string s = i->first;
+    float  t = i->second;
+    ss << setw(w0) << s;
+    ss << setw(w1) << t;
+    ss << setw(w2) << t/num_iter;
+    ss << endl;
+    total_in_ms += t;
+  }
+  ss << setw(w0) << "TOTAL";
+  ss << setw(w1) << total_in_ms;
+  ss << setw(w2) << total_in_ms/num_iter;
+  ss << endl;
+  return ss.str();
+}
 
 int main(int argc, char **argv) {
 
   file.open ("log.txt");
 
   // PARSE CMDLINE
-  std::string progname(argv[0]);
-
+  string progname(argv[0]);
 
   // problem size
   int n = 1024;
@@ -146,7 +190,8 @@ int main(int argc, char **argv) {
   }
 
   // RUN TEST
-  run(data, n, num_iter, opt);
+  map<string,float> timings;
+  run(data, n, num_iter, opt, timings);
 
   if (opt.verbose) {
     file << atos(data, n, "RESULT");
@@ -154,9 +199,16 @@ int main(int argc, char **argv) {
 
   // CHECK RESULTS
   bool pass = check_results(expected_result, data, n);
-  printf("TEST %s\n", pass ? "PASSED" : "FAILED");
+  if (!pass) {
+    cout << "***TEST FAILED***" << endl;
+  } else if (opt.verbose) {
+    cout << "***TEST PASSED***" << endl;
+  }
 
   // PRINT TIMING INFORMATION
+  cout << print_timings(timings, num_iter);
+
+  // FLUSH FILE OUTPUT
   file.flush();
   file.close();
 

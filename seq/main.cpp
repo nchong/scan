@@ -1,7 +1,7 @@
 #include "framework.h"
 #include "seq_scan.h"
 
-void run(int *data, int n, int num_iter, struct options &opt) {
+void run(int *data, int n, int num_iter, struct options &opt, map<string,float> &timings) {
   int *copy = new int[n];
   for (int run=0; run<num_iter; run++) {
     memcpy(copy, data, sizeof(int)*n);

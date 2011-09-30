@@ -64,6 +64,27 @@ __kernel void scan_pow2(__global int *gdata, __local int *ldata, int m) {
   gdata[lane1] = ldata[lane1];
 }
 
+__kernel void scan_pad_to_pow2(__global int *gdata, local int * ldata, int n) {
+  int gid = get_global_id(0);
+  int lane0 = (gid*2);
+  int lane1 = (gid*2)+1;
+  int m = 2*get_local_size(0);
+
+  ldata[lane0] = lane0 < n ? gdata[lane0] : 0;
+  ldata[lane1] = lane1 < n ? gdata[lane1] : 0;
+
+  reduce_pow2(ldata, m);
+  if (lane1 == (m-1)) {
+    ldata[lane1] = 0;
+  }
+  sweepdown_pow2(ldata, m);
+
+  if (lane0 < n)
+    gdata[lane0] = ldata[lane0];
+  if (lane1 < n)
+    gdata[lane1] = ldata[lane1];
+}
+
 /*
  * Perform the first phase of an inplace exclusive scan on a global array [gdata] of arbitrary length [n].
  *

@@ -49,11 +49,12 @@ struct options {
   int wx;
   long seed;
 };
+struct options opt;
 
 /*
  * Run [num_iter] iterations of the scan operation.
  */
-extern void run(int *data, int n, int num_iter, struct options &opt, map<string,float> &timings);
+extern void run(int *data, int n, int num_iter, map<string,float> &timings);
 
 void print_usage(string progname) {
   printf("Usage: %s [options]\n", progname.c_str());
@@ -115,7 +116,6 @@ int main(int argc, char **argv) {
   int n = 1024;
   int num_iter = 1000;
   // optional arguments
-  struct options opt;
   opt.verbose = false;
   opt.debug = false;
   opt.wx = 256;
@@ -191,7 +191,7 @@ int main(int argc, char **argv) {
 
   // RUN TEST
   map<string,float> timings;
-  run(data, n, num_iter, opt, timings);
+  run(data, n, num_iter, timings);
 
   if (opt.verbose) {
     file << atos(data, n, "RESULT");
@@ -200,9 +200,9 @@ int main(int argc, char **argv) {
   // CHECK RESULTS
   bool pass = check_results(expected_result, data, n);
   if (!pass) {
-    cout << "***TEST FAILED***" << endl;
+    cout << "# ***TEST FAILED***" << endl;
   } else if (opt.verbose) {
-    cout << "***TEST PASSED***" << endl;
+    cout << "# ***TEST PASSED***" << endl;
   }
 
   // PRINT TIMING INFORMATION

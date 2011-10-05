@@ -1,6 +1,51 @@
 Scan implementations using OpenCL
----------------------------------
+=================================
 
-Some simple scan implementations for arbitrary length arrays:
-   - harris is a vanilla prefix-sum
-   - sengupta is a segmented prefix-sum
+This project contains some simple exclusive scan (re)implementations for arbitrary length arrays:
+   - harris[0] is a vanilla scan
+   - sengupta[1] is a segmented scan.
+
+SCAN IN A NUTSHELL
+------------------
+Suppose you have a bunch of threads that each produce an arbitrary number of outputs.
+For example,
+  thread 0 outputs 3 values (a,b,c)
+  thread 1 outputs 0 values ()
+  thread 2 outputs 2 values (i,j)
+  thread 3 outputs 1 values (x).
+It is not known statically now many values a thread will produce (but you do know how many will be produced in total, in this case 6).
+You want to store these outputs in a contiguous array:
+
+      0   1   2   3   4   5
+    +---+---+---+---+---+---+
+    | a | b | c | i | j | x |
+    +---+---+---+---+---+---+
+
+How can you do this? You need an exclusive scan operation!
+Taking the array containing the number of outputs for each thread:
+
+     t0  t1  t2  t3
+    +---+---+---+---+
+    | 3 | 0 | 2 | 1 |
+    +---+---+---+---+
+
+An exclusive scan operation calculates, for each index i, the sum of the elements preceding it.
+That is, for our example:
+
+     t0  t1  t2  t3
+    +---+---+---+---+
+    | 0 | 3 | 3 | 5 |
+    +---+---+---+---+
+
+Which is exactly the offset into our contiguous array that each thread needs to write.
+
+It turns out this is a very useful operation (see Blelloch[2]) and can be put to good use for all sorts of goodness.
+Fortunately, there are work-efficient algorithms for computing scans in parallel.
+
+READMORE
+--------
+
+http://en.wikipedia.org/wiki/Prefix_sum
+[0] HARRIS [Parallel Prefix Sum (Scan) with CUDA](http://developer.download.nvidia.com/compute/cuda/1_1/Website/projects/scan/doc/scan.pdf)
+[1] SENGUPTA ET AL [Scan Primitives for GPU Computing](http://www.google.co.uk/url?sa=t&source=web&cd=1&ved=0CCgQFjAA&url=http%3A%2F%2Fciteseer.ist.psu.edu%2Fviewdoc%2Fdownload%3Bjsessionid%3D1190FF7DA52704424448D3AFDDF1AE40%3Fdoi%3D10.1.1.131.3326%26rep%3Drep1%26type%3Dpdf&ei=CpOMTqa4HoWWhQfRoIHgAw&usg=AFQjCNHqpkKwQMHosfwVNEmWm1dFI9CM0g)
+[2] BLELLOCH [Prefix Sums and Their Applications](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.128.6230&rep=rep1&type=pdf)

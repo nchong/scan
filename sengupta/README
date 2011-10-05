@@ -1,0 +1,4 @@
+This implementation is from "Scan Primitives for GPU Computing" (SENGUPTA ET AL).
+We reimplement their work-efficient parallel segmented scan as discussed in Figure 1 and Algorithm 5.
+This deals with arrays of arbitary length by using a recursive multiblock scan.
+We do not currently deal with efficient flag representations (Section 2.2.2).

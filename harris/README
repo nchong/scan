@@ -1,0 +1,4 @@
+This implementation is from "Parallel Prefix Sum (Scan) with CUDA" (HARRIS).
+We reimplement their work-efficient parallel scan as discussed in Listing 2 and Figure 5.
+This deals with arrays of arbitary length by using a recursive multiblock scan.
+We currently do not deal with bank conflicts (pg14).

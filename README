@@ -1,2 +1,6 @@
 Scan implementations using OpenCL
 ---------------------------------
+
+Some simple scan implementations for arbitrary length arrays:
+   - harris is a vanilla prefix-sum
+   - sengupta is a segmented prefix-sum

@@ -31,6 +31,20 @@ void exclusive_scan_host(int *output, int *input, int n) {
   }
 }
 
+/*
+ * Segmented exclusive scan on array tuple ([input], [flag]), both of length [n]
+ */
+void segmented_exclusive_scan_host(int *output, int *input, int *flag, int n) {
+  output[0] = 0;
+  for (int i=1; i<n; i++) {
+    if (flag[i]) {
+      output[i] = 0;
+    } else {
+      output[i] = output[i-1] + input[i-1];
+    }
+  }
+}
+
 /* check two arrays for equality */
 bool check_results(int *expected_result, int *result, int n) {
   for (int i=0; i<n; i++) {
@@ -54,7 +68,11 @@ struct options opt;
 /*
  * Run [num_iter] iterations of the scan operation.
  */
+#if SEGMENTED
+extern void run(int *data, int *flag, int n, int num_iter, map<string,float> &timings);
+#else
 extern void run(int *data, int n, int num_iter, map<string,float> &timings);
+#endif
 
 void print_usage(string progname) {
   printf("Usage: %s [options]\n", progname.c_str());
@@ -179,19 +197,35 @@ int main(int argc, char **argv) {
 
   //GENERATE RANDOM DATA
   int *data = new int[n];
-  fill_random_data(data, n);
+  fill_random_data(data, n, n);
+#if SEGMENTED
+  int *flag = new int[n];
+  fill_random_data(flag, n, 2);
+  flag[0] = 1;
+#endif
 
   int *expected_result = new int[n];
+#if SEGMENTED
+  segmented_exclusive_scan_host(expected_result, data, flag, n);
+#else
   exclusive_scan_host(expected_result, data, n);
+#endif
 
   if (opt.verbose) {
-    file << atos(data, n, "INPUT");
+    file << atos(data, n, "DATA");
+#if SEGMENTED
+    file << atos(flag, n, "FLAG");
+#endif
     file << atos(expected_result, n, "EXPECTED");
   }
 
   // RUN TEST
   map<string,float> timings;
+#if SEGMENTED
+  run(data, flag, n, num_iter, timings);
+#else
   run(data, n, num_iter, timings);
+#endif
 
   if (opt.verbose) {
     file << atos(data, n, "RESULT");

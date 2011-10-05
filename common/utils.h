@@ -34,9 +34,9 @@ int rand_int(int n) {
 /* 
  * Fill an array of length [n] with random integers from rand_int()
  */
-void fill_random_data(int *data, int n) {
+void fill_random_data(int *data, int n, int max) {
   for (int i=0; i<n; i++) {
-    data[i] = rand_int(n);
+    data[i] = rand_int(max);
   }
 }
 

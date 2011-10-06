@@ -51,8 +51,8 @@ void recursive_scan(CLWrapper &clw, bool verbose, size_t wx,
 
   } else {
     cl_mem d_data2 = clw.dev_malloc(sizeof(int)*k);
-    cl_mem d_flag2 = clw.dev_malloc(sizeof(int)*k);
     cl_mem d_part2 = clw.dev_malloc(sizeof(int)*k);
+    cl_mem d_flag2 = clw.dev_malloc(sizeof(int)*k);
 
     ASSERT_NO_CL_ERROR(
       clSetKernelArg(upsweep_subarrays, 0, sizeof(cl_mem), (void *)&d_data));
@@ -101,6 +101,10 @@ void recursive_scan(CLWrapper &clw, bool verbose, size_t wx,
     ASSERT_NO_CL_ERROR(
       clSetKernelArg(downsweep_subarrays, 9, sizeof(int), &n));
     k2 += clw.run_kernel_with_timing("downsweep_subarrays", /*dim=*/1, &gx, &wx);
+
+    clw.dev_free(d_data2);
+    clw.dev_free(d_part2);
+    clw.dev_free(d_flag2);
   }
 }
 

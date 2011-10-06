@@ -21,11 +21,9 @@ const char *getLogString(int level) {
   }
 }
 
-#define DEBUG_LEVEL LOG_WARN
-
-#ifdef DEBUG_LEVEL
+#ifdef LOG_LEVEL
 #define LOG(level, ...) do {                                                   \
-  if (level <= DEBUG_LEVEL ) {                                                 \
+  if (level <= LOG_LEVEL ) {                                                 \
     fprintf(stderr,"[%s] [%s:%d]: ", getLogString(level), __FILE__, __LINE__); \
     fprintf(stderr, __VA_ARGS__);                                              \
     fprintf(stderr, "\n");                                                     \

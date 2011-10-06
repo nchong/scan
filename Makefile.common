@@ -1,6 +1,7 @@
 # COMPILER
 CXX = g++
-CXXFLAGS = -O2 -Wall -Werror
+LOG_LEVEL=LOG_WARN
+override CXXFLAGS += -O2 -Wall -Werror -DLOG_LEVEL=$(LOG_LEVEL)
 
 # COMMON INCLUDE
 INCLUDEDIR = ../common

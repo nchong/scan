@@ -269,6 +269,12 @@ class CLWrapper {
     }
 
     void dev_free(cl_mem m) {
+      vector<cl_mem>::iterator it = find(memobjs.begin(), memobjs.end(), m);
+      if (it == memobjs.end()) {
+        LOG(LOG_WARN, "Freeing memory object not found in [memobjs]");
+      } else {
+        memobjs.erase(it);
+      }
       ASSERT_NO_CL_ERROR(clReleaseMemObject(m));
     }
 

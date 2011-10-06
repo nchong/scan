@@ -1,0 +1,25 @@
+# COMPILER
+CXX = g++
+CXXFLAGS = -O2 -Wall -Werror
+
+# COMMON INCLUDE
+INCLUDEDIR = ../common
+
+# COMMON CLEANUP
+CLEAN = log.txt
+
+# OPENCL LIBRARIES BASED ON OS
+UNAME := $(shell uname)
+ifeq ($(UNAME), Darwin)
+OPENCL = -framework OpenCL
+endif
+ifeq ($(UNAME), Linux)
+.PHONY: check-env
+
+AMDAPP ?= /opt/AMDAPP/include
+check-env:
+	@if [ ! -d "${AMDAPP}" ]; then \
+		echo "ERROR: set AMDAPP variable."; exit 1; \
+	fi
+OPENCL = -l OpenCL -I ${AMDAPP}
+endif

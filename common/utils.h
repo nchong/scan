@@ -2,7 +2,6 @@
 #define UTILS_H
 
 #include <sstream>
-#include <cstdlib>
 
 /* 
  * Convert array [data] of length [n] to string
@@ -40,8 +39,25 @@ void fill_random_data(int *data, int n, int max) {
   }
 }
 
+/*
+ * Standard bit-twiddling trick
+ */
 bool ispow2(int x) {
   return (x>0 && ((x & (x - 1)) == 0));
+}
+
+/*
+ * Check two arrays for equality
+ */
+bool check_results(int *expected_result, int *result, int n) {
+  for (int i=0; i<n; i++) {
+    if (expected_result[i] != result[i]) {
+    //printf("[FAIL ] expected_result[%d] = %d\n", i, expected_result[i]);
+    //printf("[FAIL ]          result[%d] = %d\n", i, result[i]);
+      return false;
+    }
+  }
+  return true;
 }
 
 #endif

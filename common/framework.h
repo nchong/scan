@@ -2,60 +2,17 @@
 #define FRAMEWORK_H
 
 #include "utils.h"
+#include "scan_reference.h"
 
-#include <algorithm>
-#include <cassert>
-#include <cmath>
-#include <cstdio>
 #include <fstream>
-#include <functional>
 #include <iomanip>
 #include <iostream>
 #include <map>
 #include <numeric>
-#include <sstream>
-#include <string>
-#include <vector>
 
 using namespace std;
 
 ofstream file;
-
-/* 
- * Exclusive scan on array [input] of length [n]
- */
-void exclusive_scan_host(int *output, int *input, int n) {
-  output[0] = 0;
-  for (int i=1; i<n; i++) {
-    output[i] = output[i-1] + input[i-1];
-  }
-}
-
-/*
- * Segmented exclusive scan on array tuple ([input], [flag]), both of length [n]
- */
-void segmented_exclusive_scan_host(int *output, int *input, int *flag, int n) {
-  output[0] = 0;
-  for (int i=1; i<n; i++) {
-    if (flag[i]) {
-      output[i] = 0;
-    } else {
-      output[i] = output[i-1] + input[i-1];
-    }
-  }
-}
-
-/* check two arrays for equality */
-bool check_results(int *expected_result, int *result, int n) {
-  for (int i=0; i<n; i++) {
-    if (expected_result[i] != result[i]) {
-    //printf("[FAIL ] expected_result[%d] = %d\n", i, expected_result[i]);
-    //printf("[FAIL ]          result[%d] = %d\n", i, result[i]);
-      return false;
-    }
-  }
-  return true;
-}
 
 struct options {
   bool verbose;
@@ -248,6 +205,9 @@ int main(int argc, char **argv) {
 
   // CLEANUP
   delete[] data;
+#if SEGMENTED
+  delete[] flag;
+#endif
   delete[] expected_result;
 
   return 0;

@@ -14,7 +14,7 @@ ifeq ($(UNAME), Darwin)
 OPENCL = -framework OpenCL
 endif
 ifeq ($(UNAME), Linux)
-.PHONY: check-env
+.PHONY: check-env all
 
 AMDAPP ?= /opt/AMDAPP/include
 check-env:

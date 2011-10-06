@@ -2,6 +2,7 @@
 #define UTILS_H
 
 #include <sstream>
+#include <cstdlib>
 
 /* 
  * Convert array [data] of length [n] to string

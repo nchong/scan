@@ -1,6 +1,8 @@
 #include "cl_common.h"
 #include "framework.h"
 
+#include <cmath>
+
 #define DEBUG false
 
 using namespace std;

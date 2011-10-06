@@ -2,19 +2,21 @@
 #define SEGMENTED true
 #include "framework.h"
 
+#include <cmath>
+
 #define DEBUG false
 
 using namespace std;
-
-cl_kernel scan_pow2;
-cl_kernel scan_pad_to_pow2;
-cl_kernel upsweep_subarrays;
-cl_kernel downsweep_subarrays;
 
 /*
  * Algorithm 5 as outlined in "Scan Primitives for GPU Computing" 
  *                                              (Sengupta et al).
  */
+float k0 = 0; float k1 = 0; float k2 = 0;
+cl_kernel scan_pow2;
+cl_kernel scan_pad_to_pow2;
+cl_kernel upsweep_subarrays;
+cl_kernel downsweep_subarrays;
 void recursive_scan(CLWrapper &clw, bool verbose, size_t wx,
                     cl_mem d_data, cl_mem d_part, cl_mem d_flag,
                     int n, int callnum) {
@@ -45,7 +47,7 @@ void recursive_scan(CLWrapper &clw, bool verbose, size_t wx,
       clSetKernelArg(scan_pad_to_pow2, 5, sizeof(int)*m, NULL));
     ASSERT_NO_CL_ERROR(
       clSetKernelArg(scan_pad_to_pow2, 6, sizeof(int), &n));
-    clw.run_kernel_with_timing("scan_pad_to_pow2", /*dim=*/1, &wx, &wx);
+    k0 += clw.run_kernel_with_timing("scan_pad_to_pow2", /*dim=*/1, &wx, &wx);
 
   } else {
     cl_mem d_data2 = clw.dev_malloc(sizeof(int)*k);
@@ -72,7 +74,7 @@ void recursive_scan(CLWrapper &clw, bool verbose, size_t wx,
       clSetKernelArg(upsweep_subarrays, 8, sizeof(int)*m, NULL));
     ASSERT_NO_CL_ERROR(
       clSetKernelArg(upsweep_subarrays, 9, sizeof(int), &n));
-    clw.run_kernel_with_timing("upsweep_subarrays", /*dim=*/1, &gx, &wx);
+    k1 += clw.run_kernel_with_timing("upsweep_subarrays", /*dim=*/1, &gx, &wx);
 
     recursive_scan(clw, verbose, wx,
                    d_data2, d_part2, d_flag2,
@@ -98,7 +100,7 @@ void recursive_scan(CLWrapper &clw, bool verbose, size_t wx,
       clSetKernelArg(downsweep_subarrays, 8, sizeof(int)*m, NULL));
     ASSERT_NO_CL_ERROR(
       clSetKernelArg(downsweep_subarrays, 9, sizeof(int), &n));
-    clw.run_kernel_with_timing("downsweep_subarrays", /*dim=*/1, &gx, &wx);
+    k2 += clw.run_kernel_with_timing("downsweep_subarrays", /*dim=*/1, &gx, &wx);
   }
 }
 
@@ -124,13 +126,27 @@ void run(int *data, int *flag, int n, int num_iter, map<string,float> &timings) 
   cl_mem d_part = clw.dev_malloc(sizeof(int)*k*m);
   cl_mem d_flag = clw.dev_malloc(sizeof(int)*k*m);
 
-  clw.memcpy_to_dev(d_data, sizeof(int)*n, data);
-  clw.memcpy_to_dev(d_part, sizeof(int)*n, flag);
-  clw.memcpy_to_dev(d_flag, sizeof(int)*n, flag);
+  int *result = new int[n];
+  float m0 = 0; float m1 = 0; float m2 = 0; float m3 = 0;
+  for (int run=0; run<num_iter; run++) {
+    m0 += clw.memcpy_to_dev(d_data, sizeof(int)*n, data);
+    m1 += clw.memcpy_to_dev(d_part, sizeof(int)*n, flag);
+    m2 += clw.memcpy_to_dev(d_flag, sizeof(int)*n, flag);
 
-  recursive_scan(clw, opt.verbose, opt.wx,
-                 d_data, d_part, d_flag,
-                 n, 0);
+    recursive_scan(clw, (run == 0 ? opt.verbose : false), opt.wx,
+                   d_data, d_part, d_flag,
+                   n, 0);
+
+    m3 += clw.memcpy_from_dev(d_data, sizeof(int)*n, result);
+  }
+  timings.insert(make_pair("1. data_memcpy_to_dev",   m0));
+  timings.insert(make_pair("2. part_memcpy_to_dev",   m1));
+  timings.insert(make_pair("3. flag_memcpy_to_dev",   m2));
+  timings.insert(make_pair("4. scan_pad_to_pow2",     k0));
+  timings.insert(make_pair("5. upsweep_subarrays",    k1));
+  timings.insert(make_pair("6. downsweep_subarrays",  k2));
+  timings.insert(make_pair("7. data_memcpy_from_dev", m3));
 
   clw.memcpy_from_dev(d_data, sizeof(int)*n, data);
+  delete[] result;
 }

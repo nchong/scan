@@ -308,9 +308,8 @@ class CLWrapper {
       delete[] devices;
     }
 
-    float memcpy_to_dev(cl_mem buffer, size_t size, const void *ptr) {
+    float memcpy_to_dev(cl_mem buffer, size_t size, const void *ptr, size_t offset=0) {
       cl_bool blocking_write = CL_TRUE;
-      size_t offset = 0;
       cl_uint num_events_in_wait_list = 0;
       cl_event *event_wait_list = NULL;
       cl_event e;
@@ -319,15 +318,24 @@ class CLWrapper {
       return time_and_release_event(e);
     }
 
-    float memcpy_from_dev(cl_mem buffer, size_t size, void *ptr) {
+    float memcpy_from_dev(cl_mem buffer, size_t size, void *ptr, size_t offset=0) {
       cl_bool blocking_read = CL_TRUE;
-      size_t offset = 0;
       cl_uint num_events_in_wait_list = 0;
       cl_event *event_wait_list = NULL;
       cl_event e;
       ASSERT_NO_CL_ERROR(
         clEnqueueReadBuffer(command_queue, buffer, blocking_read, offset, size, ptr, num_events_in_wait_list, event_wait_list, &e));
       return time_and_release_event(e);
+    }
+
+    void copy_buffer(cl_mem src, cl_mem dst, size_t cb) {
+      size_t src_offset = 0;
+      size_t dst_offset = 0;
+      cl_uint num_events_in_wait_list = 0;
+      const cl_event *event_wait_list = NULL;
+      cl_event e;
+      ASSERT_NO_CL_ERROR(
+        clEnqueueCopyBuffer(command_queue, src, dst, src_offset, dst_offset, cb, num_events_in_wait_list, event_wait_list, &e));
     }
 
     void run_kernel(cl_kernel kernel, 

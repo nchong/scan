@@ -416,6 +416,10 @@ class CLWrapper {
       cl_int ret;
       cl_kernel k = clCreateKernel(program, kernel_name, &ret);
       ASSERT_NO_CL_ERROR(ret);
+      map<string,cl_kernel>::iterator it = kernelmap.find(kernel_name);
+      if (it != kernelmap.end()) {
+        LOG(LOG_ERR, "Kernel name clash [%s]", kernel_name);
+      }
       kernelmap.insert(make_pair(kernel_name, k));
       return kernel_of_name(kernel_name);
     }
@@ -435,6 +439,10 @@ class CLWrapper {
         char *kernel_name = new char[size];
         ASSERT_NO_CL_ERROR(
           clGetKernelInfo(kernels[i], CL_KERNEL_FUNCTION_NAME, size, kernel_name, NULL));
+        map<string,cl_kernel>::iterator it = kernelmap.find(kernel_name);
+        if (it != kernelmap.end()) {
+          LOG(LOG_ERR, "Kernel name clash [%s]", kernel_name);
+        }
         kernelmap.insert(make_pair(kernel_name, kernels[i]));
         delete[] kernel_name;
       }

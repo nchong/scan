@@ -328,7 +328,7 @@ class CLWrapper {
       return time_and_release_event(e);
     }
 
-    void copy_buffer(cl_mem src, cl_mem dst, size_t cb) {
+    float copy_buffer(cl_mem src, cl_mem dst, size_t cb) {
       size_t src_offset = 0;
       size_t dst_offset = 0;
       cl_uint num_events_in_wait_list = 0;
@@ -336,6 +336,7 @@ class CLWrapper {
       cl_event e;
       ASSERT_NO_CL_ERROR(
         clEnqueueCopyBuffer(command_queue, src, dst, src_offset, dst_offset, cb, num_events_in_wait_list, event_wait_list, &e));
+      return time_and_release_event(e);
     }
 
     void run_kernel(cl_kernel kernel, 

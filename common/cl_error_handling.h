@@ -77,6 +77,6 @@ const char *clGetErrorString(cl_int err) {
       "%s:%d: %s(%d)\n", __FILE__, __LINE__, clGetErrorString(err), err);  \
     exit(1);                                                      \
   }                                                               \
-} while(0);
+} while(0) ;
 
 #endif

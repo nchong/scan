@@ -32,7 +32,7 @@ class SegmentedScan {
           clSetKernelArg(scan_pad_to_pow2, 5, sizeof(int)*m, NULL));
         ASSERT_NO_CL_ERROR(
           clSetKernelArg(scan_pad_to_pow2, 6, sizeof(int), &n));
-        k0 += clw.run_kernel_with_timing("scan_pad_to_pow2", /*dim=*/1, &wx, &wx);
+        k0 += clw.run_kernel_with_timing("segscan_pad_to_pow2", /*dim=*/1, &wx, &wx);
 
       } else {
         size_t gx = k * wx;
@@ -96,8 +96,8 @@ class SegmentedScan {
     SegmentedScan(CLWrapper &_clw, size_t _wx=256) : clw(_clw), wx(_wx) {
       m = wx * 2;
       clw.create_all_kernels(clw.compile("segscan.cl"));
-      scan_pow2 = clw.kernel_of_name("scan_pow2_wrapper");
-      scan_pad_to_pow2 = clw.kernel_of_name("scan_pad_to_pow2");
+      scan_pow2 = clw.kernel_of_name("segscan_pow2_wrapper");
+      scan_pad_to_pow2 = clw.kernel_of_name("segscan_pad_to_pow2");
       upsweep_subarrays = clw.kernel_of_name("upsweep_subarrays");
       downsweep_subarrays = clw.kernel_of_name("downsweep_subarrays");
       reset_timers();

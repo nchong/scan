@@ -75,7 +75,7 @@ inline void scan_pow2(__local int *x, __local int *p, __local int *f, int m) {
  * NB: m must be a power of two, and
  *     there must be exactly one workgroup of size m/2
  */
-__kernel void scan_pow2_wrapper(
+__kernel void segscan_pow2_wrapper(
     __global int *data, __global int *part, __global int *flag,
     __local  int *x,    __local  int *p,     __local int *f,
     int m) {
@@ -108,7 +108,7 @@ __kernel void scan_pow2_wrapper(
  *     m must be a power of two, and
  *     there must be exactly one workgroup of size m/2
  */
-__kernel void scan_pad_to_pow2(
+__kernel void segscan_pad_to_pow2(
     __global int *data, __global int *part, __global int *flag,
     __local  int *x,    __local  int *p,     __local int *f,
     int n) {

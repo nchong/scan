@@ -60,7 +60,7 @@ class Scan {
     Scan(CLWrapper &_clw, size_t _wx=256) : clw(_clw), wx(_wx) {
       m = wx * 2;
       clw.create_all_kernels(clw.compile("scan.cl"));
-      scan_pow2 = clw.kernel_of_name("scan_pow2");
+      scan_pow2 = clw.kernel_of_name("scan_pow2_wrapper");
       scan_pad_to_pow2 = clw.kernel_of_name("scan_pad_to_pow2");
       scan_subarrays = clw.kernel_of_name("scan_subarrays");
       scan_inc_subarrays = clw.kernel_of_name("scan_inc_subarrays");

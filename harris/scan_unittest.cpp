@@ -1,7 +1,7 @@
 #include "cl_common.h"
 #include "UnitTest++.h"
 #include "scan.h"
-#include "scan_reference.h"
+#include "scanref.h"
 #include "utils.h"
 
 #define N 8

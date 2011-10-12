@@ -2,7 +2,7 @@
 #define FRAMEWORK_H
 
 #include "utils.h"
-#include "scan_reference.h"
+#include "scanref.h"
 
 #include <fstream>
 #include <iomanip>

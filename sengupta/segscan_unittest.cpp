@@ -1,5 +1,5 @@
 #include "cl_common.h"
-#include "scan_reference.h"
+#include "scanref.h"
 #include "segscan.h"
 #include "utils.h"
 

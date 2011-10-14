@@ -1,0 +1,3 @@
+[submodule "clwrapper"]
+	path = clwrapper
+	url = git@github.com:nchong/clwrapper.git

@@ -1,4 +1,4 @@
-#include "cl_common.h"
+#include "clwrapper.h"
 #include "framework.h"
 #include "scan.h"
 

@@ -1,10 +1,9 @@
-#include "cl_common.h"
+#include "clwrapper.h"
 #include "scanref.h"
 #include "segscan.h"
 #include "utils.h"
 
 #include "UnitTest++.h"
-#include <cmath>
 
 #define N 8
 
@@ -40,6 +39,10 @@ TEST(Random_256) {
 
 TEST(Random_1024) {
   random_test(1024, 128);
+}
+
+TEST(Random_1048576) {
+  random_test(1048576, 128);
 }
 
 int main() {

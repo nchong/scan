@@ -1,13 +1,18 @@
 # COMPILER
 CXX = g++
 LOG_LEVEL=LOG_WARN
-override CXXFLAGS += -O2 -Wall -Werror -DLOG_LEVEL=$(LOG_LEVEL)
+override CXXFLAGS += -O2
+override CXXFLAGS += -Wall -Werror -pedantic -Wno-variadic-macros
+override CXXFLAGS += -DLOG_LEVEL=$(LOG_LEVEL)
 
 # COMMON INCLUDE
-INCLUDEDIR = ../common
+override INCLUDEDIR += -I ../common
+override INCLUDEDIR += -I ../clwrapper/include
+# COMMON LIBS
+override LIB = -L../clwrapper/lib -lclwrapper
 
 # COMMON CLEANUP
-CLEAN = log.txt
+CLEAN = log.txt *.o
 
 # OPENCL LIBRARIES BASED ON OS
 UNAME := $(shell uname)
@@ -24,3 +29,6 @@ check-env:
 	fi
 OPENCL = -l OpenCL -I ${AMDAPP}
 endif
+
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDEDIR) -c $^ -o $@

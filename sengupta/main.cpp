@@ -1,4 +1,4 @@
-#include "cl_common.h"
+#include "clwrapper.h"
 #define SEGMENTED true
 #include "framework.h"
 #include "segscan.h"

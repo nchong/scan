@@ -5,11 +5,11 @@ all: sengupta
 OBJ = segscan.o ../common/*.o
 
 sengupta: main.cpp $(OBJ)
-	$(CXX) $(CXXFLAGS) $(OPENCL) $(INCLUDEDIR) $(LIB) $^ -o $@
+	$(CXX) $(CXXFLAGS) $(OPENCL_LIB) $(OPENCL_INC) $(INCLUDEDIR) $(LIB) $^ -o $@
 
 ifneq ($(UNITTEST_DIR), '')
 test: segscan_unittest.cpp $(OBJ) $(UNITTEST_DIR)/libUnitTest++.a
-	$(CXX) $(CXXFLAGS) $(OPENCL) $(INCLUDEDIR) -I $(UNITTEST_DIR)/src $(LIB) -o $@ $^
+	$(CXX) $(CXXFLAGS) $(OPENCL_LIB) $(OPENCL_INC) $(INCLUDEDIR) -I $(UNITTEST_DIR)/src $(LIB) -o $@ $^
 endif
 
 clean:

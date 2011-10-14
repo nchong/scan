@@ -20,10 +20,10 @@ ifeq ($(UNAME), Darwin)
 OPENCL = -framework OpenCL
 endif
 ifeq ($(UNAME), Linux)
-.PHONY: check-env all
+.PHONY: .check-env
 
 AMDAPP ?= /opt/AMDAPP/include
-check-env:
+.check-env:
 	@if [ ! -d "${AMDAPP}" ]; then \
 		echo "ERROR: set AMDAPP variable."; exit 1; \
 	fi
@@ -31,4 +31,4 @@ OPENCL = -l OpenCL -I ${AMDAPP}
 endif
 
 %.o: %.cpp
-	$(CXX) $(CXXFLAGS) $(INCLUDEDIR) -c $^ -o $@
+	$(CXX) $(CXXFLAGS) -I $(AMDAPP) $(INCLUDEDIR) -c $^ -o $@

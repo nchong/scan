@@ -17,7 +17,8 @@ CLEAN = log.txt *.o
 # OPENCL LIBRARIES BASED ON OS
 UNAME := $(shell uname)
 ifeq ($(UNAME), Darwin)
-OPENCL = -framework OpenCL
+OPENCL_LIB = -framework OpenCL
+OPENCL_INC =
 endif
 ifeq ($(UNAME), Linux)
 .PHONY: .check-env
@@ -27,8 +28,9 @@ AMDAPP ?= /opt/AMDAPP/include
 	@if [ ! -d "${AMDAPP}" ]; then \
 		echo "ERROR: set AMDAPP variable."; exit 1; \
 	fi
-OPENCL = -l OpenCL -I ${AMDAPP}
+OPENCL_LIB = -l OpenCL
+OPENCL_INC = -I ${AMDAPP}
 endif
 
 %.o: %.cpp
-	$(CXX) $(CXXFLAGS) -I $(AMDAPP) $(INCLUDEDIR) -c $^ -o $@
+	$(CXX) $(CXXFLAGS) $(OPENCL_INC) $(INCLUDEDIR) -c $^ -o $@

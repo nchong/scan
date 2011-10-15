@@ -1,0 +1,44 @@
+Building the scan implementations
+=================================
+
+Using OpenCL is a little verbose so we use a [clwrapper library](https://github.com/nchong/clwrapper).
+
+This means building the implementations needs a bit of setup. Sorry!
+
+Our aim is to setup a working directory that looks like this:
+
+    work
+      |-- scan                  (* this directory *)
+      |-- clwrapper             (* the clwrapper library *)
+      |-- inc                   (* install directory for header files *)
+      |   `-- clwrapper.h
+      `-- lib                   (* install directory for library files *)
+          `-- libclwrapper.so
+
+Here's how to do it assuming that you start off in the work directory.
+
+* Make the install directories
+    $ mkdir inc
+    $ mkdir lib
+
+* Checkout the scan implementations and clwrapper library
+    $ git clone git@github.com:nchong/scan.git
+    $ git clone git@github.com:nchong/clwrapper.git
+
+* Make the clwrapper library
+    $ cd clwrapper
+    $ make
+    $ cd ..
+
+* Make some symlinks
+    $ cd inc
+    $ ln -s ../clwrapper/include/*.h .
+    $ cd ..
+
+    $ cd lib
+    $ ln -s ../clwrapper/lib/*.so .
+    $ cd ..
+
+* Build the scan implementations
+    $ cd scan
+    $ make

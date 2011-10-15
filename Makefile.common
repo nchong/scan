@@ -7,9 +7,9 @@ override CXXFLAGS += -DLOG_LEVEL=$(LOG_LEVEL)
 
 # COMMON INCLUDE
 override INCLUDEDIR += -I ../common
-override INCLUDEDIR += -I ../clwrapper/include
+override INCLUDEDIR += -I ../../inc
 # COMMON LIBS
-override LIB = -L../clwrapper/lib -lclwrapper
+override LIB = -L../../lib -lclwrapper
 
 # COMMON CLEANUP
 CLEAN = log.txt *.o

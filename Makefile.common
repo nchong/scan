@@ -19,10 +19,11 @@ UNAME := $(shell uname)
 ifeq ($(UNAME), Darwin)
 OPENCL_LIB = -framework OpenCL
 OPENCL_INC =
+SHARED = -dynamiclib
 endif
+
 ifeq ($(UNAME), Linux)
 .PHONY: .check-env
-
 AMDAPP ?= /opt/AMDAPP/include
 .check-env:
 	@if [ ! -d "${AMDAPP}" ]; then \
@@ -30,6 +31,7 @@ AMDAPP ?= /opt/AMDAPP/include
 	fi
 OPENCL_LIB = -l OpenCL
 OPENCL_INC = -I ${AMDAPP}
+SHARED = -shared
 endif
 
 %.o: %.cpp

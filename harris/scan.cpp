@@ -45,7 +45,12 @@ void Scan::recursive_scan(cl_mem d_data, int n) {
 
 Scan::Scan(CLWrapper &clw, size_t wx) : clw(clw), wx(wx) {
   m = wx * 2;
+#if EMBED_CL
+  #include "scan.cl.h"
+  clw.create_all_kernels(clw.compile_from_string((char *)&scan_cl));
+#else
   clw.create_all_kernels(clw.compile("scan.cl"));
+#endif
   scan_pow2 = clw.kernel_of_name("scan_pow2_wrapper");
   scan_pad_to_pow2 = clw.kernel_of_name("scan_pad_to_pow2");
   scan_subarrays = clw.kernel_of_name("scan_subarrays");

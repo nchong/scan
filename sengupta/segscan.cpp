@@ -72,7 +72,12 @@ void SegmentedScan::recursive_scan(cl_mem d_data, cl_mem d_part, cl_mem d_flag, 
 
 SegmentedScan::SegmentedScan(CLWrapper &clw, size_t wx) : clw(clw), wx(wx) {
   m = wx * 2;
+#if EMBED_CL
+  #include "segscan.cl.h"
+  clw.create_all_kernels(clw.compile_from_string((char *)&segscan_cl));
+#else
   clw.create_all_kernels(clw.compile("segscan.cl"));
+#endif
   scan_pow2 = clw.kernel_of_name("segscan_pow2_wrapper");
   scan_pad_to_pow2 = clw.kernel_of_name("segscan_pad_to_pow2");
   upsweep_subarrays = clw.kernel_of_name("upsweep_subarrays");

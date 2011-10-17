@@ -4,6 +4,12 @@ all: sengupta
 
 OBJ = segscan.o ../common/*.o
 
+segscan.cl.h: segscan.cl
+	../cl2include.sh segscan.cl segscan.cl.h
+
+segscan.o: segscan.cpp segscan.cl.h
+	$(CXX) $(CXXFLAGS) $(OPENCL_INC) $(INCLUDEDIR) -D EMBED_CL=$(EMBED_CL) -c $< -o $@
+
 sengupta: main.cpp $(OBJ)
 	$(CXX) $(CXXFLAGS) $(OPENCL_LIB) $(OPENCL_INC) $(INCLUDEDIR) $(LIB) $^ -o $@
 

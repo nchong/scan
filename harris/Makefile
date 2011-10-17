@@ -4,11 +4,10 @@ all: harris
 
 OBJ = scan.o ../common/*.o
 
-scan.cl.h: scan.cl
-	../cl2include.sh scan.cl scan.cl.h
-
+ifeq ($(EMBED_CL), 'true')
 scan.o: scan.cpp scan.cl.h
 	$(CXX) $(CXXFLAGS) $(OPENCL_INC) $(INCLUDEDIR) -D EMBED_CL=$(EMBED_CL) -c $< -o $@
+endif
 
 harris: main.cpp $(OBJ)
 	$(CXX) $(CXXFLAGS) $(OPENCL_LIB) $(OPENCL_INC) $(INCLUDEDIR) $(LIB) $^ -o $@

@@ -4,11 +4,10 @@ all: sengupta
 
 OBJ = segscan.o ../common/*.o
 
-segscan.cl.h: segscan.cl
-	../cl2include.sh segscan.cl segscan.cl.h
-
+ifeq ($(EMBED_CL), 'true')
 segscan.o: segscan.cpp segscan.cl.h
 	$(CXX) $(CXXFLAGS) $(OPENCL_INC) $(INCLUDEDIR) -D EMBED_CL=$(EMBED_CL) -c $< -o $@
+endif
 
 sengupta: main.cpp $(OBJ)
 	$(CXX) $(CXXFLAGS) $(OPENCL_LIB) $(OPENCL_INC) $(INCLUDEDIR) $(LIB) $^ -o $@
@@ -19,4 +18,4 @@ test: segscan_unittest.cpp $(OBJ) $(UNITTEST_DIR)/libUnitTest++.a
 endif
 
 clean:
-	rm -f test sengupta $(CLEAN)
+	rm -f test sengupta segscan.cl.h $(CLEAN)

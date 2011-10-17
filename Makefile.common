@@ -1,6 +1,9 @@
 # GLOBAL BUILD OPTIONS
 EMBED_CL=true
 
+# OPENCL TO HEADER CONVERSION
+OPENCL2INCLUDE=../cl2include.sh
+
 # COMPILER
 CXX = g++
 LOG_LEVEL=LOG_WARN
@@ -39,3 +42,6 @@ endif
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) $(OPENCL_INC) $(INCLUDEDIR) -c $^ -o $@
+
+%.cl.h: %.cl
+	$(OPENCL2INCLUDE) $< $@

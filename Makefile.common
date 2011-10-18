@@ -7,7 +7,7 @@ OPENCL2INCLUDE=../cl2include.sh
 # COMPILER
 CXX = g++
 LOG_LEVEL=LOG_WARN
-override CXXFLAGS += -O2
+override CXXFLAGS += -O2 -fPIC
 override CXXFLAGS += -Wall -Werror -pedantic -Wno-variadic-macros
 override CXXFLAGS += -DLOG_LEVEL=$(LOG_LEVEL)
 

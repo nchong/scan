@@ -78,7 +78,7 @@ __kernel void scan_pow2_wrapper(__global int *data, __local int *x, int m) {
   data[lane1] = x[lane1];
 }
 
-__kernel void scan_pad_to_pow2(__global int *data, local int * x, int n) {
+__kernel void scan_pad_to_pow2(__global int *data, __local int * x, int n) {
   int gid = get_global_id(0);
   int lane0 = (gid*2);
   int lane1 = (gid*2)+1;

@@ -4,7 +4,7 @@ all: harris
 
 OBJ = scan.o ../common/*.o
 
-ifeq ($(EMBED_CL), 'true')
+ifneq ($(EMBED_CL), '')
 scan.o: scan.cpp scan.cl.h
 	$(CXX) $(CXXFLAGS) $(OPENCL_INC) $(INCLUDEDIR) -D EMBED_CL=$(EMBED_CL) -c $< -o $@
 endif

@@ -4,7 +4,7 @@ all: sengupta
 
 OBJ = segscan.o ../common/*.o
 
-ifeq ($(EMBED_CL), 'true')
+ifneq ($(EMBED_CL), '')
 segscan.o: segscan.cpp segscan.cl.h
 	$(CXX) $(CXXFLAGS) $(OPENCL_INC) $(INCLUDEDIR) -D EMBED_CL=$(EMBED_CL) -c $< -o $@
 endif

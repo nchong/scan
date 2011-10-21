@@ -43,7 +43,8 @@ void Scan::recursive_scan(cl_mem d_data, int n) {
   }
 }
 
-Scan::Scan(CLWrapper &clw, size_t wx) : clw(clw), wx(wx) {
+Scan::Scan(CLWrapper &clw, size_t wx) : clw(clw), wx(wx),
+  c0(0), c1(0), m0(0), m1(0), k0(0), k1(0), k2(0) {
   m = wx * 2;
 #if EMBED_CL
   #include "scan.cl.h"
@@ -64,11 +65,13 @@ void Scan::reset_timers() {
 }
 
 void Scan::get_timers(map<string,float> &timings) {
-  timings.insert(make_pair("1. memcpy to dev     ", m0));
-  timings.insert(make_pair("2. scan_pad_to_pow2  ", k0));
-  timings.insert(make_pair("3. scan_subarrays    ", k1));
-  timings.insert(make_pair("4. scan_inc_subarrays", k2));
-  timings.insert(make_pair("5. memcpy from dev   ", m1));
-  timings.insert(make_pair("6. cpy from dev      ", c0));
-  timings.insert(make_pair("7. cpy from dev      ", c1));
+  if (clw.has_profiling()) {
+    timings.insert(make_pair("SCAN1. data_memcpy_to_dev",   m0));
+    timings.insert(make_pair("SCAN2. scan_pad_to_pow2  ",   k0));
+    timings.insert(make_pair("SCAN3. scan_subarrays    ",   k1));
+    timings.insert(make_pair("SCAN4. scan_inc_subarrays",   k2));
+    timings.insert(make_pair("SCAN5. data_memcpy_from_dev", m1));
+    timings.insert(make_pair("SCAN6. data_cpy_to_dev",      c0));
+    timings.insert(make_pair("SCAN7. data_cpy_from_dev",    c1));
+  }
 }

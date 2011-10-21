@@ -70,7 +70,9 @@ void SegmentedScan::recursive_scan(cl_mem d_data, cl_mem d_part, cl_mem d_flag, 
   }
 }
 
-SegmentedScan::SegmentedScan(CLWrapper &clw, size_t wx) : clw(clw), wx(wx) {
+SegmentedScan::SegmentedScan(CLWrapper &clw, size_t wx) : clw(clw), wx(wx),
+  m0(0), m1(0), m2(0), m3(0),
+  k0(0), k1(0), k2(0) {
   m = wx * 2;
 #if EMBED_CL
   #include "segscan.cl.h"
@@ -91,11 +93,11 @@ void SegmentedScan::reset_timers() {
 }
 
 void SegmentedScan::get_timers(map<string,float> &timings) {
-  timings.insert(make_pair("1. data_memcpy_to_dev",   m0));
-  timings.insert(make_pair("2. part_memcpy_to_dev",   m1));
-  timings.insert(make_pair("3. flag_memcpy_to_dev",   m2));
-  timings.insert(make_pair("4. scan_pad_to_pow2",     k0));
-  timings.insert(make_pair("5. upsweep_subarrays",    k1));
-  timings.insert(make_pair("6. downsweep_subarrays",  k2));
-  timings.insert(make_pair("7. data_memcpy_from_dev", m3));
+  timings.insert(make_pair("SEGSCAN1. data_memcpy_to_dev",   m0));
+  timings.insert(make_pair("SEGSCAN2. part_memcpy_to_dev",   m1));
+  timings.insert(make_pair("SEGSCAN3. flag_memcpy_to_dev",   m2));
+  timings.insert(make_pair("SEGSCAN4. scan_pad_to_pow2",     k0));
+  timings.insert(make_pair("SEGSCAN5. upsweep_subarrays",    k1));
+  timings.insert(make_pair("SEGSCAN6. downsweep_subarrays",  k2));
+  timings.insert(make_pair("SEGSCAN7. data_memcpy_from_dev", m3));
 }

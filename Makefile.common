@@ -5,11 +5,18 @@ EMBED_CL=1
 OPENCL2INCLUDE=../cl2include.sh
 
 # COMPILER
+ifeq ($(CXX), icc)
+CXX = icc
+override CXXFLAGS += -O2
+override CXXFLAGS += -Wall -Wcheck
+else
 CXX = g++
-LOG_LEVEL=LOG_WARN
-override CXXFLAGS += -O2 -fPIC
-override CXXFLAGS += -Wall -Werror -pedantic -Wno-variadic-macros
+override CXXFLAGS += -O2
+override CXXFLAGS += -Wall -Wextra -Werror -pedantic -Wno-variadic-macros
+endif
+LOG_LEVEL = LOG_WARN
 override CXXFLAGS += -DLOG_LEVEL=$(LOG_LEVEL)
+override CXXFLAGS += -fPIC
 
 # COMMON INCLUDE
 override INCLUDEDIR += -I ../common
@@ -35,7 +42,7 @@ AMDAPP ?= /opt/AMDAPP/include
 	@if [ ! -d "${AMDAPP}" ]; then \
 		echo "ERROR: set AMDAPP variable."; exit 1; \
 	fi
-OPENCL_LIB = -l OpenCL
+OPENCL_LIB = -lOpenCL
 OPENCL_INC = -I ${AMDAPP}
 SHARED = -shared
 endif
